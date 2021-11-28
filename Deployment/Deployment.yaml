@@ -1,0 +1,167 @@
+apiVersion: v1
+data:
+  config.yml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:55681
+    exporters:
+        jaeger: 
+          endpoint: simplest-collector.observability.svc.cluster.local:14250
+          insecure: true
+        datadog:
+          api:
+            key: "cdc645fa09c8948d15d4d69109405bd9"
+    service:
+        pipelines:
+          traces:
+            receivers: [otlp]
+            exporters: [jaeger,datadog]
+          metrics:
+            receivers: [otlp]
+            exporters: [datadog]
+kind: ConfigMap
+metadata:
+  name: collector-config
+  namespace: default
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: patient-api
+  labels:
+    app: patient-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: patient-api
+  template:
+    metadata:
+      labels:
+        app: patient-api
+    spec:
+      volumes:
+      - name: collector-config
+        configMap:
+          name: collector-config
+          items:
+          - key: config.yml
+            path: config.yml
+      containers:
+      - name: patient-api
+        image: adityakanekar83/patientapi:1.0.3
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 200m
+            memory: 200Mi
+      - name: otel-collector
+        image: otel/opentelemetry-collector-contrib:0.23.0
+        args: 
+        - --config=/conf/config.yml
+        volumeMounts:
+        - name: collector-config
+          mountPath: /conf
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: allergy-api
+  labels:
+    app: allergy-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: allergy-api
+  template:
+    metadata:
+      labels:
+        app: allergy-api
+    spec:
+      volumes:
+      - name: collector-config
+        configMap:
+          name: collector-config
+          items:
+          - key: config.yml
+            path: config.yml
+      containers:
+      - name: allergy-api
+        image: adityakanekar83/allergyapi:1.0.3
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 200m
+            memory: 200Mi
+      - name: otel-collector
+        image: otel/opentelemetry-collector-contrib:0.23.0
+        args: 
+        - --config=/conf/config.yml
+        volumeMounts:
+        - name: collector-config
+          mountPath: /conf
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: patient-api-service
+spec:
+ type: LoadBalancer
+ ports:
+ - port: 80
+ selector:
+   app: patient-api
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: allergy-api-service
+spec:
+ type: LoadBalancer
+ ports:
+ - port: 8081
+   targetPort: 80
+ selector:
+   app: allergy-api
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pms-api-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  labels:
+    app: pms-api-ingress
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: patient-api-service
+            port: 
+              number: 80
+      

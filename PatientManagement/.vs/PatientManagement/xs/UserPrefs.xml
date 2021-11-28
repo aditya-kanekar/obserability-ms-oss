@@ -1,0 +1,30 @@
+﻿<Properties StartupConfiguration="{5AE57264-C40D-4FD4-9087-7BFEFD1DE846}|Default">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Dal/PatientDbContext.cs">
+    <Files>
+      <File FileName="Controllers/PatientController.cs" Line="20" Column="10" />
+      <File FileName="Dal/PatientDbContext.cs" Line="7" Column="9" />
+      <File FileName="Dockerfile" Line="20" Column="47" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="PatientManagement" expanded="True">
+            <Node name="PatientManagement" expanded="True">
+              <Node name="Controllers" expanded="True" />
+              <Node name="Dal" expanded="True">
+                <Node name="PatientDbContext.cs" selected="True" />
+              </Node>
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.ItemProperties.PatientManagement PreferredExecutionTarget="/Applications/Microsoft Edge.app" />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MultiItemStartupConfigurations />
+</Properties>
