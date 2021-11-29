@@ -21,9 +21,9 @@ namespace AllergyApi.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<Allergy> Get(Guid patientId)
+        public Allergy Get(Guid patientId)
         {
-            return this._context.Allergies.Where(a=> a.PatientId == patientId);
+            return this._context.Allergies.Where(a=> a.PatientId == patientId).FirstOrDefault();
         }
 
         [HttpPost]

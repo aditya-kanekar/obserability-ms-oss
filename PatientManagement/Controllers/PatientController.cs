@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -29,9 +30,28 @@ namespace PatientManagement.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<Patient> Get()
+        public async Task<IEnumerable<Patient>> Get()
         {
-            return _context.Patients;
+            String allergyApi = $"{_configuration.GetValue<string>("AppSettings:AllergyAPI")}";
+            var patients = _context.Patients.ToList();
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(allergyApi);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                foreach (var patient in patients)
+                {
+                    HttpResponseMessage response = await client.GetAsync($"AllergyApi?patientId={patient.Id}");
+                    if (response.IsSuccessStatusCode)
+                    {
+                        Allergy allergy = await response.Content.ReadFromJsonAsync<Allergy>();
+                        patient.Allergies = allergy.Name;
+                    }
+                }
+            }
+
+
+            return patients;
         }
 
         [HttpPost]
@@ -49,16 +69,14 @@ namespace PatientManagement.Controllers
             _context.Patients.Add(newPatient);
             if (!string.IsNullOrEmpty(patient.Allergies))
             {
-                Allergy allergies =  new Allergy();
+                Allergy allergies = new Allergy();
                 allergies.PatientId = newPatient.Id;
-                allergies.Name=patient.Allergies;
+                allergies.Name = patient.Allergies;
 
                 String allergyApi = $"{_configuration.GetValue<string>("AppSettings:AllergyAPI")}/AllergyApi";
                 using (var client = new HttpClient())
                 {
-
                     HttpResponseMessage response = await client.PostAsJsonAsync(allergyApi, allergies);
-
                     if (response.IsSuccessStatusCode)
                     {
                         _context.SaveChanges();

@@ -55,7 +55,7 @@ spec:
             path: config.yml
       containers:
       - name: patient-api
-        image: adityakanekar83/patientapi:1.0.3
+        image: adityakanekar83/patientapi:1.0.6
         ports:
         - containerPort: 80
         resources:
@@ -100,7 +100,7 @@ spec:
             path: config.yml
       containers:
       - name: allergy-api
-        image: adityakanekar83/allergyapi:1.0.3
+        image: adityakanekar83/allergyapi:1.0.4
         ports:
         - containerPort: 80
         resources:

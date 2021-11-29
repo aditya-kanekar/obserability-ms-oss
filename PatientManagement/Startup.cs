@@ -30,6 +30,8 @@ namespace PatientManagement
                     .SetResourceBuilder(ResourceBuilder.CreateDefault()
                         .AddService("PatientApi"))
                     .AddAspNetCoreInstrumentation()
+                    .AddSqlClientInstrumentation()
+                    .AddHttpClientInstrumentation()
                     .AddOtlpExporter(o =>
                     {
                         o.Endpoint = new Uri("http://localhost:4317");
